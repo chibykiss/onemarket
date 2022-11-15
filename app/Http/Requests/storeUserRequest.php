@@ -24,11 +24,16 @@ class storeUserRequest extends FormRequest
     public function rules()
     {
         return [
-            "fullname" => ["required", "String"],
+            "firstname" => ["required", "String"],
+            "middlename" => ["String"],
+            "lastname" => ["required", "String"],
+            "nationality" => ["required", "String"],
+            "sex" => ["required", "String"],
+            "marital_status" => ["required", "String"],
+            "dob" => ["required", "date"],
             "username" => ["required", "String"],
             "email" => ["email", "unique:users,email"],
             "phone_number" => ["required", "String", "unique:users,phone_number"],
-            "userCategory_id" => ["required"],
             "password" => ["required"],
             "profile_pic" => ["image","mimes:jpeg,png,jpg,gif,svg", "max:2048"]
         ];

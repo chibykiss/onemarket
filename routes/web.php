@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ForgotPasswordController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,3 +19,7 @@ Route::get('/reset-password/{token}', function ($token) {
     return view('auth.reset-password', ['token' => $token]);
 });
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetpassword'])->name('password.reset');
+Route::get('/', function(){
+    Artisan::call('cache:clear');
+    return view('welcome');
+});

@@ -21,12 +21,19 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'fullname',
+        'firstname',
+        'middlename',
+        'lastname',
         'username',
         'email',
         'phone_number',
+        'nationality',
+        'sex',
+        'marital_status',
+        'date_of_birth',
         'profile_pic',
-        'userCategory_id',
+        'approved',
+        'user_categories_id',
         'password',
     ];
 
@@ -58,4 +65,15 @@ class User extends Authenticatable
     //     $url = "http://127.0.0.1:8000/reset-password/$token";
     //     $this->notify(new ResetPasswordNotification($url));
     // }
+    public function admin (){
+        return $this->hasOne(Admin::class);
+    }
+
+    public function owner () {
+        return $this->hasOne(Owner::class);
+    }
+
+    public function categories (){
+        return $this->belongsToMany(UserCategory::class,'user_category_joins','user_id','UserCategory_id');
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Traits\Helpers;
 use App\Http\Requests\storeUserRequest;
 use App\Http\Requests\updateUserRequest;
 use App\Http\Resources\UserResource;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    use HttpResponses,ImageUpload;
+    use HttpResponses,ImageUpload, Helpers;
     /**
      * Display a listing of the resource.
      *
@@ -70,15 +71,45 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($user)
+    public function show(User $user)
     {
-        $member = User::where('id',$user);
+        // $member = User::where([
+        //     ['id', '=',$user],
+        //     ['approved', '=', '1'],
+        // ]);
         //$check_user = $user->exist();
-        if($member->exists()){
-            return new UserResource($member->first());
+        if($user->exists()){
+            return new UserResource($user);
         }else{
             return $this->error('','user does not exist',404);
         }
+        
+    }
+
+    public function getUsercategory(){
+        $user_cats = auth()->user()->categories;
+        //return response()->json(count($user_cats));
+        if(count($user_cats) === 0){
+            return response()->json([
+                "data" => "its empty"
+            ]); 
+        }else{
+            return response()->json([
+                "data" => "you are an admin"
+            ]); 
+        }
+        //  foreach(auth()->user()->categories as $cat){
+        //     $cats_id[] = $cat->id;
+        //  }
+        //  if(in_array(1,$cats_id)){
+        //     return response()->json([
+        //         "data" => "you are an admin"
+        //     ]);
+        //  }else{
+        //     return response()->json([
+        //         "data" => "you are not an admin"
+        //     ]);
+        //  }
         
     }
 
@@ -93,7 +124,9 @@ class UserController extends Controller
     {
         $request->validated($request->all());
         $member = User::where('id', $user);
-        //$real_user = User::find($user);
+        if($this->isApproved($member) == 'approved'){
+            return $this->error('you cannot update an approved member details');
+        }
         if($member->exists()){
             $real_user = $member->first();
             if($request->hasFile('profile_pic')){
@@ -103,23 +136,22 @@ class UserController extends Controller
             }else{
                 $filePath = $real_user->profile_pic;
             }
-            if(isset($request->phone_number)){
-                $trim_num = ltrim($request->phone_number, '0');
-                $trim_num = '234'. $trim_num;
-            }else{
-                $trim_num = $real_user->phone_number;
-            }
         
             $real_user->update([
-                'fullname' => isset($request->fullname)? $request->fullname : $real_user->fullname,
-                'username' => isset($request->username) ? $request->username:$real_user->username,
+                'firstname' => isset($request->fullname) ? $request->fullname : $real_user->fullname,
+                'lastname' => isset($request->lastname) ? $request->lastname : $real_user->lastname,
+                'middlename' => isset($request->middlename) ? $request->middlename : $real_user->middlename,
+                'username' => isset($request->username) ? $request->username : $real_user->username,
                 'profile_pic' => $filePath,
-                'email' => isset($request->email) ? $request->email:$real_user->email,
-                'phone_number' => $trim_num,
-                'user_categories_id' => isset($request->user_type) ? $request->user_type:$real_user->user_categories_id,
+                'email' => isset($request->email) ? $request->email : $real_user->email,
+                'phone_number' => isset($request->phone_number) ? $request->phone_number : $real_user->phone_number,
+                'nationality' => isset($request->nationality) ? $request->nationality : $real_user->nationality,
+                'sex' => isset($request->sex) ? $request->sex : $real_user->sex,
+                'marital_status' => isset($request->marital_status) ? $request->marital_status : $real_user->marital_status,
+                'date_of_birth' => isset($request->dob) ? $request->dob : $real_user->date_of_birth,
                 'password' => isset($request->password)
-                                ?Hash::make(strtolower($request->password))
-                                :$real_user->password
+                    ? Hash::make(strtolower($request->password))
+                    : $real_user->password
             ]);
             return new UserResource($real_user);
         }else{
@@ -135,11 +167,19 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($user)
+    public function destroy(User $user)
     {
-        $member = User::where('id',$user);
-        if($member->exists()){
-            $member->delete();
+        
+        //$member = User::where('id',$user);
+        // if($user->approved == '1'){
+        //     return $this->success('approved user cannot be deleted');
+        // }
+        if($user->exists()){
+            $approved = $this->isApproved($user);
+            if($approved == 'approved'){
+                return $this->error('user cannot be deleted');
+            }
+            $user->delete();
             return $this->success('deleted sucessfully');
         }else{
             return $this->error('resource not found', code:404);

@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\storeUserRequest;
 use App\Http\Requests\updateUserRequest;
+use App\Http\Resources\UserLoginResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Models\UserCategoryJoin;
 use App\Traits\HttpResponses;
 use App\Traits\ImageUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -18,26 +21,42 @@ class AuthController extends Controller
     public function register(storeUserRequest $request)
     {
         $request->validated($request->all());
-        $user = new User();
         if ($request->hasFile('profile_pic')) {
             $image = $request->file('profile_pic');
             $filePath = $this->UserImageUpload($image, 'profile_images');
         } else {
             $filePath = "noimage.jpg";
         }
-        //$trim_num = ltrim($request->phone_number,'0');
-        $user->profile_pic = $filePath;
-        $user->fullname = $request->fullname;
-        $user->username = $request->username;
-        $user->email = $request->email;
-        $user->phone_number = $request->phone_number;
-        $user->user_categories_id = $request->userCategory_id;
-        $user->password = Hash::make(strtolower($request->password));
-        $user->save();
-        return $this->success([
-            "user" => $user,
-            //"token" => $user->createToken('API Token of '.$user->username)->plainTextToken
-        ]);
+        try{
+                $user = User::create([
+                    'profile_pic' => $filePath,
+                    'firstname' => $request->firstname,
+                    'middlename' => $request->middlename,
+                    'lastname' => $request->lastname,
+                    'username' => $request->username,
+                    'email' => $request->email,
+                    'phone_number' => $request->phone_number,
+                    'nationality' => $request->nationality,
+                    'sex' => $request->sex,
+                    'marital_status' => $request->marital_status,
+                    'date_of_birth' => $request->dob,
+                    'user_categories_id' => 8,
+                    'password' => Hash::make(strtolower($request->password)),
+                ]);
+                // UserCategoryJoin::create([
+                //     'user_id' => $user->id,
+                //     'UserCategory_id' => 8
+                // ]);
+            return new UserResource($user);
+        }catch(\Exception $e){
+            return $this->error([
+                "message" => $e->getMessage()
+            ],'user could not be created');
+        }
+        // return $this->success([
+        //     "user" => $user_gotten,
+        //     //"token" => $user->createToken('API Token of '.$user->username)->plainTextToken
+        // ]);
     }
     public function login(Request $request)
     {
@@ -50,10 +69,17 @@ class AuthController extends Controller
             return $this->error("","Credentials do not match",401);
         }
 
-        $user = User::where('username',$request->username)->first();
+            //$user = User::where('username',$request->username)->first();
+        $getuser = User::with('admin')->where('username',$request->username)->first();
+        if($getuser->admin === null){
+            return $this->error([
+                "message" => "user is not an admin"
+            ]);
+        }
+        $user = new UserLoginResource($getuser);
         return $this->success([
             "user" => $user,
-            "token" => $user->createToken("API token for ".$user->username)->plainTextToken
+            "token" => $user->createToken("API token for ")->plainTextToken
         ]);
         
     }
@@ -81,12 +107,17 @@ class AuthController extends Controller
       
 
             $real_user->update([
-                'fullname' => isset($request->fullname)?$request->fullname:$real_user->fullname,
+                'firstname' => isset($request->fullname)?$request->fullname:$real_user->fullname,
+                'lastname' => isset($request->lastname)?$request->lastname:$real_user->lastname,
+                'middlename' => isset($request->middlename)?$request->middlename:$real_user->middlename,
                 'username' => isset($request->username) ? $request->username : $real_user->username,
                 'profile_pic' => $filePath,
                 'email' => isset($request->email) ? $request->email : $real_user->email,
                 'phone_number' => isset($request->phone_number) ? $request->phone_number : $real_user->phone_number,
-                'user_categories_id' => isset($request->user_type) ? $request->user_type : $real_user->user_categories_id,
+                'nationality' => isset($request->nationality) ? $request->nationality : $real_user->nationality,
+                'sex' => isset($request->sex) ? $request->sex : $real_user->sex,
+                'marital_status' => isset($request->marital_status) ? $request->marital_status : $real_user->marital_status,
+                'date_of_birth' => isset($request->dob) ? $request->dob : $real_user->date_of_birth,
                 'password' => isset($request->password)
                     ? Hash::make(strtolower($request->password))
                     : $real_user->password

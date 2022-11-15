@@ -27,8 +27,7 @@ class updateUserRequest extends FormRequest
             "fullname" => ["String"],
             "username" => ["String"],
             "email" => ["email"],
-            "phone_number" => ["String", "unique:users,phone_number"],
-            "user_type" => ["number"],
+            "phone_number" => ["String"],
             "password" => ["String"],
             "profile_pic" => ["image", "mimes:jpeg,png,jpg,gif,svg", "max:2048"]
         ];

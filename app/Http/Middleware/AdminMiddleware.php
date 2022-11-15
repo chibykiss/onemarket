@@ -16,12 +16,33 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if($request->user()->user_categories_id !== 1){
+        $user_categories = auth()->user()->categories;
+        if(count($user_categories) === 0){
             return response()->json([
                 "status" => 'unauthorized',
-                "message" => 'you are not authorized'
-            ],401);
+                "message" => 'you are not authorized empty'
+            ], 401);
+          
+        }else{
+            foreach ($user_categories as $cat) {
+                $cats_id[] = $cat->id;
+            }
+            if (!in_array(1, $cats_id)) {
+                return response()->json([
+                    "status" => 'unauthorized',
+                    "message" => 'you are not authorized'
+                ], 401);
+            }
+            return $next($request);
         }
-        return $next($request);
+        //return $next($request);
+     
+        // if((int) $request->user()->user_categories_id !== 1){
+        //     return response()->json([
+        //         "status" => 'unauthorized',
+        //         "message" => 'you are not authorized'
+        //     ],401);
+        // }
+       
     }
 }

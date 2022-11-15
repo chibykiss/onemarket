@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Models\password_reset_pin;
 use App\Models\User;
 use App\Notifications\ResetPasswordNotification;
@@ -195,8 +196,9 @@ class ForgotPasswordController extends Controller
                 'password' => Hash::make($password)
             ]);
             $passwordReset->delete();
+            $one_user = new UserResource($user);
             return $this->success([
-                'user' => $user,
+                'user' => $one_user,
                 "token" => $user->createToken('API Token of ' . $user->username)->plainTextToken
             ], 'password reseted successfully');
         }
