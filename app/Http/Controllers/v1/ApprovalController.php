@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\v1;
 
+use App\Http\Controllers\Controller;
 use App\Models\Owner;
 use App\Models\Shop;
 use App\Models\User;
@@ -11,9 +12,9 @@ use Illuminate\Http\Request;
 class ApprovalController extends Controller
 {
     use HttpResponses;
-    public function approveUser (User $user)
+    public function approveUser (User $member)
     {
-       return $this->approve($user,"User");
+       return $this->approve($member,"User");
     }
     public function approveShop (Shop $shop)
     {

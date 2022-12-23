@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\v1;
 
-use App\Http\Requests\storeUserRequest;
-use App\Http\Requests\updateUserRequest;
-use App\Http\Resources\UserLoginResource;
-use App\Http\Resources\UserResource;
+use App\Http\Controllers\Controller;
+
+
+use App\Http\Requests\v1\storeUserRequest;
+use App\Http\Requests\v1\updateUserRequest;
+use App\Http\Resources\v1\UserLoginResource;
+use App\Http\Resources\v1\UserResource;
 use App\Models\User;
-use App\Models\UserCategoryJoin;
 use App\Traits\HttpResponses;
 use App\Traits\ImageUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -79,7 +80,7 @@ class AuthController extends Controller
         $user = new UserLoginResource($getuser);
         return $this->success([
             "user" => $user,
-            "token" => $user->createToken("API token for ")->plainTextToken
+            "token" => $user->createToken("API token for $user->username")->plainTextToken
         ]);
         
     }

@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\v1;
 
-use App\Http\Requests\ShopRequest;
-use App\Http\Resources\ShopResource;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\ShopRequest;
+use App\Http\Resources\v1\ShopResource;
 use App\Models\Shop;
 use App\Traits\HttpResponses;
 use Illuminate\Http\Request;

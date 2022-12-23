@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\v1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -34,7 +34,7 @@ class storeUserRequest extends FormRequest
             "username" => ["required", "String"],
             "email" => ["email", "unique:users,email"],
             "phone_number" => ["required", "String", "unique:users,phone_number"],
-            "password" => ["required"],
+            "password" => ["required","confirmed"],
             "profile_pic" => ["image","mimes:jpeg,png,jpg,gif,svg", "max:2048"]
         ];
     }

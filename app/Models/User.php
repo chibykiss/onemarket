@@ -73,6 +73,18 @@ class User extends Authenticatable
         return $this->hasOne(Owner::class);
     }
 
+    public function attachee() {
+        return $this->hasOne(Attachee::class);
+    }
+
+    public function worker(){
+        return $this->hasOne(Worker::class);
+    }
+
+    public function apprentice(){
+        return $this->hasOne(Apprentice::class);
+    }
+
     public function categories (){
         return $this->belongsToMany(UserCategory::class,'user_category_joins','user_id','UserCategory_id');
     }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\v1;
 
-use App\Http\Requests\OwnerRequest;
-use App\Http\Resources\OwnerResource;
-use App\Http\Resources\ShopResource;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\OwnerRequest;
+use App\Http\Resources\v1\OwnerResource;
 use App\Models\Owner;
 use App\Models\Shop;
 use App\Models\User;
@@ -25,6 +25,7 @@ class OwnerController extends Controller
     public function index()
     {
         $owners = Owner::where('approved','=', "1")->get();
+        $owners = $owners->load('user');
         return OwnerResource::collection($owners);
     }
 
@@ -37,18 +38,21 @@ class OwnerController extends Controller
     public function store(OwnerRequest $request)
     {
         $request->validated($request->all());
+
         //check if the userid has been approved before making owner
         $user = User::find($request->user_id);
         if($user->approved !== "1") return $this->error(['message' => 'user is not approved']);
+
         //get shop
         $shop = Shop::find($request->shop_id);
-        //make sure shop has not been assigned to another owner
-        if ($shop->owner_id !== null) {
-            return $this->error(['message' => 'shop already assigned to an owner']);
-        }
+
         //make sure shop has been approved first
         if($shop->approved !== "1") return $this->error(['message' => 'shop has not been approved']);
+
+        //make sure shop has not been assigned to another owner
+        if ($shop->owner_id !== null) return $this->error(['message' => 'shop already assigned to an owner']);
         
+        //deal with the images uploaded
         $rpath = $this->UserImageUpload($request->file('tenancy_receipt'), 'tenancy_reciepts');
         $regpath = $this->UserImageUpload($request->file('reg_receipt'), 'registration_reciepts');
         if ($request->hasFile('cert')) {
@@ -63,7 +67,6 @@ class OwnerController extends Controller
                 'user_id' => $request->user_id,
                 'owner_served' => $request->owner_served,
                 'previous_job' => $request->coming_from,
-                'tenancy_receipt' => $rpath,
                 'reg_receipt' => $regpath,
                 'cert' => $cert,
                 'approved' => "0",
@@ -73,11 +76,12 @@ class OwnerController extends Controller
             //update shop details
             $updateshop = $shop->update([
                 'owner_id' => $owner->id,
+                'tenancy_receipt' => $rpath,
                 'gotten_via' => $request->via,
                 'guarantor' => $request->guarantor,
                 'known_for' => $request->known_for,
                 'company_name' => $request->company_name,
-                'guranteed' => $request->guranteed,
+                'guranteed' => 1,
             ]);
 
             if(!$updateshop){
@@ -223,11 +227,12 @@ class OwnerController extends Controller
                 DB::rollBack();
                 return $this->error(['message' => 'error with shop deletion']);
              }
-            $owner->delete();
+            
                $deljoin = UserCategoryJoin::where('user_id',$owner->user_id)->delete();
                if(!$deljoin){
                 DB::rollBack();
                }
+                $owner->delete();
                DB::commit();
                return $this->success([
                    "status" => 'Owner deleted permanently'

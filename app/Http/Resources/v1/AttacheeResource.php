@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\v1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserCategoryResource extends JsonResource
+class AttacheeResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,10 +14,11 @@ class UserCategoryResource extends JsonResource
      */
     public function toArray($request)
     {
-        // return parent::toArray($request);
         return [
             'id' => $this->id,
-            'type_of_user' => $this->user_type
+            "approved" => $this->approved,
+            "letter" => $this->attachee_letter,
+            "user" => new UserResource($this->user),
         ];
     }
 }

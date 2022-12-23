@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\v1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class OwnerResource extends JsonResource
+class AdminResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,9 +16,7 @@ class OwnerResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "approved" => $this->approved,
-            "owner_served" => $this->owner_served,
-            "coming_from" => $this->previous_job,
+            "admin_type" => $this->admin_type,
             "user" => new UserResource($this->user),
         ];
     }

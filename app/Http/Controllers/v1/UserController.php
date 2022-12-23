@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\v1;
 
+use App\Http\Controllers\Controller;
 use App\Traits\Helpers;
 use App\Http\Requests\storeUserRequest;
 use App\Http\Requests\updateUserRequest;
@@ -71,15 +72,16 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(User $user)
+    public function show(User $member)
     {
         // $member = User::where([
         //     ['id', '=',$user],
         //     ['approved', '=', '1'],
         // ]);
         //$check_user = $user->exist();
-        if($user->exists()){
-            return new UserResource($user);
+        if($member->exists()){
+            
+            return new UserResource($member);
         }else{
             return $this->error('','user does not exist',404);
         }
