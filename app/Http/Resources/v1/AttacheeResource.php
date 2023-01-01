@@ -18,6 +18,7 @@ class AttacheeResource extends JsonResource
             'id' => $this->id,
             "approved" => $this->approved,
             "letter" => $this->attachee_letter,
+            "shop" => new ShopResource($this->shop),
             "user" => new UserResource($this->user),
         ];
     }

@@ -26,4 +26,16 @@ class Shop extends Model
     public function owner (){
         return $this->belongsTo(Owner::class);
     }
+
+    public function attachee () {
+        return $this->hasMany(Attachee::class);
+    }
+
+    public function apprentice(){
+        return $this->hasMany(Apprentice::class);
+    }
+
+    public function worker(){
+        return $this->hasMany(Worker::class);
+    }
 }

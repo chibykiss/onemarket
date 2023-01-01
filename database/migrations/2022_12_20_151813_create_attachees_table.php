@@ -16,10 +16,12 @@ return new class extends Migration
         Schema::create('attachees', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('shop_id');
             $table->string('attachee_letter');
             $table->integer('approved')->default(0);
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('shop_id')->references('id')->on('shops');
         });
     }
 

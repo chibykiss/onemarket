@@ -13,7 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -83,6 +83,10 @@ class User extends Authenticatable
 
     public function apprentice(){
         return $this->hasOne(Apprentice::class);
+    }
+
+    public function taskforce(){
+        return $this->hasOne(Taskforce::class);
     }
 
     public function categories (){

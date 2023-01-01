@@ -24,12 +24,18 @@ class updateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            "fullname" => ["String"],
+            "firstname" => ["String"],
+            "middlename" => ["String"],
+            "lastname" => ["String"],
+            "nationality" => ["String"],
+            "sex" => ["String"],
+            "marital_status" => ["String"],
+            "dob" => ["date"],
             "username" => ["String"],
             "email" => ["email"],
             "phone_number" => ["String"],
-            "password" => ["String"],
-            "profile_pic" => ["image", "mimes:jpeg,png,jpg,gif,svg", "max:2048"]
+            "password" => ["confirmed"],
+            "profile_pic" => ["image","mimes:jpeg,png,jpg,gif,svg", "max:2048"]
         ];
     }
 }

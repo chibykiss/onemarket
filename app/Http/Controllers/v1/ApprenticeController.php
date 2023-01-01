@@ -5,13 +5,16 @@ namespace App\Http\Controllers\v1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\ApprenticeResource;
 use App\Models\Apprentice;
+use App\Models\Shop;
 use App\Models\User;
 use App\Models\UserCategoryJoin;
+use App\Traits\HttpResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ApprenticeController extends Controller
 {
+    use HttpResponses;
     /**
      * Display a listing of the resource.
      *
@@ -19,7 +22,8 @@ class ApprenticeController extends Controller
      */
     public function index()
     {
-        //
+        $apprentices = Apprentice::with('user','shop')->get(); //method two
+        return ApprenticeResource::collection($apprentices);
     }
 
     /**
@@ -32,6 +36,7 @@ class ApprenticeController extends Controller
     {
         $request->validate([
             'user_id' => 'required|numeric|unique:apprentices,user_id|exists:users,id',
+            'shop_id' => 'required|numeric|unique:apprentices,shop_id|exists:shops,id',
         ]);
 
         //make sure user has been approved before making him 
@@ -39,9 +44,14 @@ class ApprenticeController extends Controller
         if ($user->approved !== "1") return $this->error(['message' => 'user is not approved']);
 
 
+        //make sure the shop has been assigned to an owner
+        $shop = Shop::find($request->shop_id);
+        if ($shop->owner_id === null) return $this->error(['message' => 'shop does not have an owner']);
+
         DB::beginTransaction();
         $apprentice = Apprentice::create([
             'user_id' => $request->user_id,
+            'shop_id' => $request->shop_id,
         ]);
 
         //give the user a category of an Apprentice
@@ -85,8 +95,19 @@ class ApprenticeController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Apprentice $apprentice)
     {
-        //
+        //if apprentice has been approved he cant be removed
+        if ($apprentice->approved === 1) return $this->error('', 'attachee has to be unapproved to be removed', 422);
+
+        DB::beginTransaction();
+        $deljoin = UserCategoryJoin::where('user_id', $apprentice->user_id)->delete();
+        if (!$deljoin) {
+            DB::rollBack();
+        }
+        $apprentice->delete();
+        DB::commit();
+
+        return $this->success(['message' => 'removed'], 'the apprentice has been removed');
     }
 }

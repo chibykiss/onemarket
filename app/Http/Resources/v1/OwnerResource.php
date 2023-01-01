@@ -20,6 +20,7 @@ class OwnerResource extends JsonResource
             "owner_served" => $this->owner_served,
             "coming_from" => $this->previous_job,
             "user" => new UserResource($this->user),
+            // "shops" => new ShopResource($this->shops),
         ];
     }
 }

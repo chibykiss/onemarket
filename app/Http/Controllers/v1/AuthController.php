@@ -48,7 +48,9 @@ class AuthController extends Controller
                 //     'user_id' => $user->id,
                 //     'UserCategory_id' => 8
                 // ]);
-            return new UserResource($user);
+            $newUser =  new UserResource($user);
+            return $this->success($newUser);
+
         }catch(\Exception $e){
             return $this->error([
                 "message" => $e->getMessage()

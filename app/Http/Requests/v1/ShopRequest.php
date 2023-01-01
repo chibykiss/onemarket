@@ -27,12 +27,12 @@ class ShopRequest extends FormRequest
             "shop_no" => ["required","string","unique:shops,shop_number"],
             "plaza_name" => ["required","string"],
             "shop_address" => ["required","string"],
+            "tenancy_receipt" => ["image","mimes:jpeg,png,jpg,gif,svg", "max:2048"],
             "owner" => ["numeric","exists:owners,id"],
             "via" => ["string"],
             "guarantor" => ["numeric", "exists:owners,id"],
             "known_for" => ["numeric"],
             "company_name" => ["string"],
-            "guaranteed" => ["boolean"],
         ];
     }
 }

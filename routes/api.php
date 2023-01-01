@@ -9,8 +9,11 @@ use App\Http\Controllers\v1\DisapprovalController;
 use App\Http\Controllers\v1\ForgotPasswordController;
 use App\Http\Controllers\v1\OwnerController;
 use App\Http\Controllers\v1\ShopController;
+use App\Http\Controllers\v1\TaskforceController;
+use App\Http\Controllers\v1\TotalsController;
 use App\Http\Controllers\v1\UserCategoryController;
 use App\Http\Controllers\v1\UserController;
+use App\Http\Controllers\v1\WorkerController;
 use App\Models\UserCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,16 +42,24 @@ Route::prefix('v1')->group(function () {
             // Route::apiResource('/user', UserController::class);
             // Route::apiResource('/shop', ShopController::class);
             // Route::apiResource('/owner', OwnerController::class);
+            Route::post('/shop/add', [ShopController::class, 'shopowner']);
             Route::apiResources([
                 '/member' => UserController::class,
                 '/shop' => ShopController::class,
                 '/owner' => OwnerController::class,
                 '/attachee' => AttacheeController::class,
                 '/apprentice' => ApprenticeController::class,
+                '/worker' => WorkerController::class,
+                '/taskforce' => TaskforceController::class,
             ]);
-            //Route::post('/shop/add', [ShopController::class, 'shopowner']);
+            
             Route::put('/updateowner/{owner}', [OwnerController::class,'updateOwner']);
             
+            //get total of all entities
+            Route::get('/total/members', [TotalsController::class,'totalMembers']);
+            Route::get('/total/attachees', [TotalsController::class,'totalAttachees']);
+            Route::get('/total/apprentices', [TotalsController::class,'totalApprentices']);
+            Route::get('/total/workers', [TotalsController::class,'totalWorkers']);
             //this routes uses the superadmin middleware
             Route::group(["middleware" => ["isSuperAdmin"]], function(){
                 Route::apiResource('/admin', AdminController::class);
@@ -58,13 +69,21 @@ Route::prefix('v1')->group(function () {
                     Route::get('/approve/member/{member}', 'approveUser');
                     Route::get('/approve/shop/{shop}', 'approveShop');
                     Route::get('/approve/owner/{owner}', 'approveOwner');
+                    Route::get('/approve/attachee/{attachee}', 'approveAttachee');
+                    Route::get('/approve/apprentice/{apprentice}', 'approveApprentice');
+                    Route::get('/approve/worker/{worker}', 'approveWorker');
+                    Route::get('/approve/taskforce/{taskforce}', 'approveTaskforce');
                 });
-
+                
                 //Disaprove Controller
                 Route::controller(DisapprovalController::class)->group(function(){
                     Route::get('/disapprove/member/{member}','disapproveUser');
                     Route::get('/disapprove/shop/{shop}','disapproveShop');
                     Route::get('/disapprove/owner/{owner}','disapproveOwner');
+                    Route::get('/disapprove/attachee/{attachee}', 'disapproveAttachee');
+                    Route::get('/disapprove/apprentice/{apprentice}', 'disapproveApprentice');
+                    Route::get('/disapprove/worker/{worker}', 'disapproveWorker');
+                    Route::get('/disapprove/taskforce/{taskforce}', 'disapproveTaskforce');
                 });
 
 

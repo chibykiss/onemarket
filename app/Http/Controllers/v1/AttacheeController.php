@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\AttacheeResource;
 use App\Models\Attachee;
+use App\Models\Shop;
 use App\Models\User;
 use App\Models\UserCategoryJoin;
 use App\Traits\Helpers;
@@ -40,17 +41,23 @@ class AttacheeController extends Controller
     {
         $request->validate([
             'user_id' => 'required|numeric|unique:attachees,user_id|exists:users,id',
+            'shop_id' => 'required|numeric|unique:attachees,shop_id|exists:shops,id',
             'cover_letter' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
         //make sure user has been approved before making him 
          $user = User::find($request->user_id);
         if($user->approved !== "1") return $this->error(['message' => 'user is not approved']);
 
+        //make sure the shop has been assigned to an owner
+        $shop = Shop::find($request->shop_id);
+        if($shop->owner_id === null) return $this->error(['message' => 'shop does not have an owner']);
+
         $letter = $this->UserImageUpload($request->file('cover_letter'), 'attachee_request_letters');
 
         DB::beginTransaction();
         $attachee = Attachee::create([
             'user_id' => $request->user_id,
+            'shop_id' => $request->shop_id,
             'attachee_letter' => $letter,
         ]);
 

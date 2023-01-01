@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UserResource;
+use App\Http\Resources\v1\UserResource;
 use App\Models\password_reset_pin;
 use App\Models\User;
 use App\Notifications\ResetPasswordNotification;
@@ -36,7 +36,7 @@ class ForgotPasswordController extends Controller
             ]);
             return $this->sendsmsnotification($request->emailphone);
         }else{
-            return $this->error('you did not supply a valid email or phone_number','invalid email or phone number');
+            return $this->error(message: 'you did not supply a valid email or phone_number');
         }
     }
     private function sendemailnotification($email)
@@ -94,7 +94,7 @@ class ForgotPasswordController extends Controller
                 return $this->error([
                     'body' => $response,
                     'via' => 'sms',
-                ]);
+                ],'sms sending failed');
             }
            
         }else{
@@ -153,7 +153,7 @@ class ForgotPasswordController extends Controller
         }else{
             return $this->error([
                 "body" => $response
-            ]);
+            ],'an error occured while verifying code');
         }
        
     }
@@ -205,6 +205,11 @@ class ForgotPasswordController extends Controller
         }
     }
 
+
+
+
+
+    
     // public function forgotpassword(Request $request)
     // {
     //     //validate email first 

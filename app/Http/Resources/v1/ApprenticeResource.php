@@ -17,6 +17,7 @@ class ApprenticeResource extends JsonResource
         return [
             'id' => $this->id,
             'approved' => $this->approved,
+            'shop' => new ShopResource($this->shop),
             'user' => new UserResource($this->user),
         ];
     }

@@ -14,4 +14,8 @@ class Attachee extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function shop(){
+        return $this->belongsTo(Shop::class);
+    }
 }
