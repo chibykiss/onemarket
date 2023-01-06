@@ -21,7 +21,10 @@ class TaskforceController extends Controller
      */
     public function index()
     {
-        //
+        $taskforces = Taskforce::with('user')->get();
+        $alltaskforce = TaskforceResource::collection($taskforces);
+        return $this->success($alltaskforce);
+
     }
 
     /**
@@ -39,7 +42,7 @@ class TaskforceController extends Controller
 
         //make sure user has been approved before making him 
         $user = User::find($request->user_id);
-        if ($user->approved !== "1") return $this->error(['message' => 'user is not approved'], code: 422);
+        if ($user->approved !== "1") return $this->error(message: 'user is not approved');
 
     
 
@@ -58,7 +61,8 @@ class TaskforceController extends Controller
             DB::rollBack();
         }
         DB::commit();
-        return new TaskforceResource($taskforce);
+        $newTaskforce = new TaskforceResource($taskforce);
+        return $this->success($newTaskforce);
     }
 
     /**
@@ -93,7 +97,7 @@ class TaskforceController extends Controller
     public function destroy(Taskforce $taskforce)
     {
         //if worker has been approved he cant be removed
-        if ($taskforce->approved === 1) return $this->error('', 'Taskforce has to be unapproved to be removed', 422);
+        if ($taskforce->approved === 1) return $this->error(message:'Taskforce has to be unapproved to be removed');
 
         DB::beginTransaction();
         $deljoin = UserCategoryJoin::where('user_id', $taskforce->user_id)->delete();
@@ -103,6 +107,6 @@ class TaskforceController extends Controller
         $taskforce->delete();
         DB::commit();
 
-        return $this->success(['message' => 'removed'], 'the Taskforce has been removed');
+        return $this->success(message: 'the Taskforce has been removed');
     }
 }

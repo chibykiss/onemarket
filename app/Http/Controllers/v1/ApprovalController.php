@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1;
 use App\Http\Controllers\Controller;
 use App\Models\Apprentice;
 use App\Models\Attachee;
+use App\Models\Bill;
 use App\Models\Owner;
 use App\Models\Shop;
 use App\Models\Taskforce;
@@ -50,6 +51,11 @@ class ApprovalController extends Controller
     public function approveTaskforce(Taskforce $taskforce)
     {
         return $this->approve($taskforce, "Taskforce");
+    }
+
+    public function approveFee(Bill $fee)
+    {
+        return $this->approve($fee, 'Fee');
     }
 
     private function approve($who, string $message){

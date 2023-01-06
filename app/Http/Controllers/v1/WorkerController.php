@@ -22,8 +22,9 @@ class WorkerController extends Controller
      */
     public function index()
     {
-        $workers = Worker::with('user')->get();
-        return WorkerResource::collection($workers);
+        $workers = Worker::with('user','shop')->get();
+        $allworkers = WorkerResource::collection($workers);
+        return $this->success($allworkers);
     }
 
     /**
@@ -35,17 +36,17 @@ class WorkerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|numeric|unique:apprentices,user_id|exists:users,id',
-            'shop_id' => 'required|numeric|unique:apprentices,shop_id|exists:shops,id',
+            'user_id' => 'required|numeric|unique:workers,user_id|exists:users,id',
+            'shop_id' => 'required|numeric|unique:workers,shop_id|exists:shops,id',
         ]);
 
         //make sure user has been approved before making him 
         $user = User::find($request->user_id);
-        if ($user->approved !== "1") return $this->error(['message' => 'user is not approved'],code:422);
+        if ($user->approved !== "1") return $this->error(message:'user is not approved');
 
         //make sure the shop has been assigned to an owner
         $shop = Shop::find($request->shop_id);
-        if ($shop->owner_id === null) return $this->error(['message' => 'shop does not have an owner'],code:422);
+        if ($shop->owner_id === null) return $this->error(message:'shop does not have an owner');
 
         DB::beginTransaction();
         $worker = Worker::create([
@@ -62,7 +63,8 @@ class WorkerController extends Controller
             DB::rollBack();
         }
         DB::commit();
-        return new WorkerResource($worker);
+        $newWorker = new WorkerResource($worker);
+        return $this->success($newWorker);
     }
 
     /**
@@ -97,7 +99,7 @@ class WorkerController extends Controller
     public function destroy(Worker $worker)
     {
         //if worker has been approved he cant be removed
-        if ($worker->approved === 1) return $this->error('', 'worker has to be unapproved to be removed', 422);
+        if ($worker->approved === 1) return $this->error(message:'worker has to be unapproved to be removed');
 
         DB::beginTransaction();
         $deljoin = UserCategoryJoin::where('user_id', $worker->user_id)->delete();
@@ -107,6 +109,6 @@ class WorkerController extends Controller
         $worker->delete();
         DB::commit();
 
-        return $this->success(['message' => 'removed'], 'the worker has been removed');
+        return $this->success(message:'the worker has been removed');
     }
 }

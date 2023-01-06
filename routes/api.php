@@ -5,6 +5,7 @@ use App\Http\Controllers\v1\ApprenticeController;
 use App\Http\Controllers\v1\ApprovalController;
 use App\Http\Controllers\v1\AttacheeController;
 use App\Http\Controllers\v1\AuthController;
+use App\Http\Controllers\v1\BillController;
 use App\Http\Controllers\v1\DisapprovalController;
 use App\Http\Controllers\v1\ForgotPasswordController;
 use App\Http\Controllers\v1\OwnerController;
@@ -51,6 +52,7 @@ Route::prefix('v1')->group(function () {
                 '/apprentice' => ApprenticeController::class,
                 '/worker' => WorkerController::class,
                 '/taskforce' => TaskforceController::class,
+                '/fee' => BillController::class,
             ]);
             
             Route::put('/updateowner/{owner}', [OwnerController::class,'updateOwner']);
@@ -73,6 +75,7 @@ Route::prefix('v1')->group(function () {
                     Route::get('/approve/apprentice/{apprentice}', 'approveApprentice');
                     Route::get('/approve/worker/{worker}', 'approveWorker');
                     Route::get('/approve/taskforce/{taskforce}', 'approveTaskforce');
+                    Route::get('/approve/fee/{fee}', 'approveFee');
                 });
                 
                 //Disaprove Controller

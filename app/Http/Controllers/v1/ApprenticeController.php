@@ -23,7 +23,8 @@ class ApprenticeController extends Controller
     public function index()
     {
         $apprentices = Apprentice::with('user','shop')->get(); //method two
-        return ApprenticeResource::collection($apprentices);
+        $allApprentice = ApprenticeResource::collection($apprentices);
+        return $this->success($allApprentice);
     }
 
     /**
@@ -41,12 +42,12 @@ class ApprenticeController extends Controller
 
         //make sure user has been approved before making him 
         $user = User::find($request->user_id);
-        if ($user->approved !== "1") return $this->error(['message' => 'user is not approved']);
+        if ($user->approved !== "1") return $this->error(message:'user is not approved');
 
 
         //make sure the shop has been assigned to an owner
         $shop = Shop::find($request->shop_id);
-        if ($shop->owner_id === null) return $this->error(['message' => 'shop does not have an owner']);
+        if ($shop->owner_id === null) return $this->error(message:'shop does not have an owner');
 
         DB::beginTransaction();
         $apprentice = Apprentice::create([
@@ -63,7 +64,8 @@ class ApprenticeController extends Controller
             DB::rollBack();
         }
         DB::commit();
-        return new ApprenticeResource($apprentice);
+        $newApprentice = new ApprenticeResource($apprentice);
+        return $this->success($newApprentice);
     }
 
     /**
@@ -98,7 +100,7 @@ class ApprenticeController extends Controller
     public function destroy(Apprentice $apprentice)
     {
         //if apprentice has been approved he cant be removed
-        if ($apprentice->approved === 1) return $this->error('', 'attachee has to be unapproved to be removed', 422);
+        if ($apprentice->approved === 1) return $this->error(message:'attachee has to be unapproved to be removed');
 
         DB::beginTransaction();
         $deljoin = UserCategoryJoin::where('user_id', $apprentice->user_id)->delete();
@@ -108,6 +110,6 @@ class ApprenticeController extends Controller
         $apprentice->delete();
         DB::commit();
 
-        return $this->success(['message' => 'removed'], 'the apprentice has been removed');
+        return $this->success(message:'the apprentice has been removed');
     }
 }

@@ -17,8 +17,8 @@ class WorkerResource extends JsonResource
         return [
             'id' => $this->id,
             'approved' => $this->approved,
-            'user' => new UserResource($this->user),
             'shop' => new ShopResource($this->shop),
+            'user' => new UserResource($this->user),
         ];
     }
 }

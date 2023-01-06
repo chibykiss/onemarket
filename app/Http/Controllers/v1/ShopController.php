@@ -21,8 +21,10 @@ class ShopController extends Controller
      */
     public function index()
     {
-        $shop = Shop::all();
-        return ShopResource::collection($shop);
+        $shop = Shop::with('owner.user','attachee.user','apprentice.user','worker.user')->get();
+        //$shop = Shop::with('owner')->get();
+        //return ShopResource::collection($shop);
+        return $this->success($shop);
     }
 
     /**
@@ -152,14 +154,38 @@ class ShopController extends Controller
         $owner = Owner::find($request->owner);
         if ($owner->approved == '0') return $this->error(message: "owner has to be approved first");
 
-
+        $shop = Shop::find($shop);
         if ($request->hasFile('tenancy_receipt')) {
             $treceipt = $this->UserImageUpload($request->file('tenancy_receipt'), 'tenancy_reciepts');
         } else {
-            $treceipt = null;
+            $treceipt = $shop->tenancy_receipt;
         }
 
-        $shop = Shop::find($shop);
+        
+        //check if the existing owner is equal to the new owner
+        if($shop->owner_id !== $request->owner){
+            /**check the number of times the old owner appears in the shop model, if he appears
+             *  more than once, then we can update it with a new owner id else we cant. remember 
+             * all owners must have at least one shop.
+             */
+            $number = Shop::where('owner_id',$shop->owner_id)->count();
+            if($number === 1) return $this->error(message: "cannot update shop owner. every owner must have at least one shop");
+            $shop->update([
+                "shop_number" => isset($request->shop_no) ? $request->shop_no : $shop->shop_number,
+                "plaza_name" => isset($request->plaza_name) ? $request->plaza_name : $shop->plaza_name,
+                "shop_address" => isset($request->shop_address) ? $request->shop_address : $shop->shop_address,
+                "tenancy_receipt" => $treceipt,
+                "owner_id" => isset($request->owner) ? $request->owner : $shop->owner,
+                "gotten_via" => isset($request->via) ? $request->via : $shop->gotten_via,
+                "guarantor" => isset($request->guarantor) ? $request->guarantor : $shop->guarantor,
+                "known_for" => isset($request->known_for) ? $request->known_for : $shop->known_for,
+                "company_name" => isset($request->company_name) ? $request->company_name : $shop->company_name,
+                "guranteed" => 1,
+            ]);
+            $newShop = new ShopResource($shop);
+            return $this->success($newShop);
+        }
+      
         $shop->update([
             "shop_number" => isset($request->shop_no) ? $request->shop_no : $shop->shop_number,
             "plaza_name" => isset($request->plaza_name) ? $request->plaza_name : $shop->plaza_name,

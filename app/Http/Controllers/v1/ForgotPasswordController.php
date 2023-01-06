@@ -10,13 +10,11 @@ use App\Notifications\ResetPasswordNotification;
 use App\Traits\HttpResponses;
 use App\Traits\TermiiSmsApi;
 use Carbon\Carbon;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
+
 
 class ForgotPasswordController extends Controller
 {

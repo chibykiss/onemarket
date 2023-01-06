@@ -27,8 +27,9 @@ class AttacheeController extends Controller
     {
         // $attachees = Attachee::all();
         // $attachees = $attachees->load('user'); // using the load method for relationships
-        $attachees = Attachee::with('user')->get(); //method two
-        return AttacheeResource::collection($attachees);
+        $attachees = Attachee::with('user','shop')->get(); //method two
+        return $this->success($attachees);
+        //return AttacheeResource::collection($attachees);
     }
 
     /**
@@ -46,11 +47,11 @@ class AttacheeController extends Controller
         ]);
         //make sure user has been approved before making him 
          $user = User::find($request->user_id);
-        if($user->approved !== "1") return $this->error(['message' => 'user is not approved']);
+        if($user->approved !== "1") return $this->error(message: 'user is not approved');
 
         //make sure the shop has been assigned to an owner
         $shop = Shop::find($request->shop_id);
-        if($shop->owner_id === null) return $this->error(['message' => 'shop does not have an owner']);
+        if($shop->owner_id === null) return $this->error(message:'shop does not have an owner');
 
         $letter = $this->UserImageUpload($request->file('cover_letter'), 'attachee_request_letters');
 
@@ -70,7 +71,8 @@ class AttacheeController extends Controller
             DB::rollBack();
         }
         DB::commit();
-        return new AttacheeResource($attachee);
+        $newAttachee = new AttacheeResource($attachee);
+        return $this->success($newAttachee);
     }
 
     /**
@@ -105,7 +107,7 @@ class AttacheeController extends Controller
     public function destroy(Attachee $attachee)
     {
         //if attachee has been approved he cant be removed
-        if($attachee->approved === 1) return $this->error('','attachee has to be unapproved to be removed',422);
+        if($attachee->approved === 1) return $this->error(message:'attachee has to be unapproved to be removed');
 
         DB::beginTransaction();
         $deljoin = UserCategoryJoin::where('user_id', $attachee->user_id)->delete();
@@ -119,6 +121,6 @@ class AttacheeController extends Controller
         if (File::exists($imgpath)) {
             File::delete($imgpath);
         }
-        return $this->success(['message' => 'removed'],'the attachee has been removed');
+        return $this->success(message:'the attachee has been removed');
     }
 }
